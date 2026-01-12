@@ -684,13 +684,24 @@
         const secretMessage = document.getElementById('secretMessage');
         const secretText = document.getElementById('secretText');
         const loveQuote = document.getElementById('loveQuote');
+        const errorMessage = document.getElementById('errorMessage');
+
+        // Music Elements
         const bgMusic = document.getElementById('bgMusic');
         const musicBtn = document.getElementById('musicBtn');
-        const errorMessage = document.getElementById('errorMessage');
+        const songTitle = document.getElementById('songTitle');
+
+        // Music Variables
+        const songs = [
+            { title: "Duniya ❤️", src: "music/duniya.mp3" },
+            { title: "Saiyara 💕", src: "music/saiyara.mp3" },
+            { title: "Jaan ✨", src: "music/jaan.mp3" }
+        ];
+        let currentSongIndex = 0;
 
         // Global Variables
         let messages = [];
-        let loveStartDate = new Date('2024-06-04'); // Change this to your actual date
+        let loveStartDate = new Date('2024-06-04'); // 4 June 2024 - Our first meeting
 
         // Initialize Page
         document.addEventListener('DOMContentLoaded', function() {
@@ -706,11 +717,81 @@
             setInterval(updateLoveTimer, 1000);
             
             // Show random secret messages
-            setInterval(showRandomSecret, 300000); // Every 5 minutes
+            setInterval(showRandomSecret, 10000); // Every 5 minutes
             
             // Change quote every 30 seconds
-            setInterval(showRandomQuote, 30000);
+            setInterval(showRandomQuote, 5000);
         });
+
+        // Initialize Music Player
+        function initializeMusic() {
+            if (songs.length > 0) {
+                bgMusic.src = songs[currentSongIndex].src;
+                songTitle.textContent = songs[currentSongIndex].title;
+                
+                // Auto play when song ends
+                bgMusic.addEventListener('ended', function() {
+                    nextSong();
+                });
+            }
+        }
+
+        // Toggle Music Play/Pause
+        function toggleMusic() {
+            if (bgMusic.paused) {
+                bgMusic.play()
+                    .then(() => {
+                        musicBtn.innerHTML = '<i class="fas fa-pause"></i>';
+                        musicBtn.style.color = '#4CAF50';
+                        songTitle.style.color = '#4CAF50';
+                    })
+                    .catch(error => {
+                        console.error('Error playing music:', error);
+                        showNotification('Could not play music. Make sure music files are in "music" folder.', 'error');
+                    });
+            } else {
+                bgMusic.pause();
+                musicBtn.innerHTML = '<i class="fas fa-play"></i>';
+                musicBtn.style.color = '#ff4081';
+                songTitle.style.color = '#666';
+            }
+        }
+
+        // Next Song
+        function nextSong() {
+            currentSongIndex = (currentSongIndex + 1) % songs.length;
+            bgMusic.src = songs[currentSongIndex].src;
+            songTitle.textContent = songs[currentSongIndex].title;
+            
+            if (!bgMusic.paused) {
+                bgMusic.play()
+                    .then(() => {
+                        musicBtn.innerHTML = '<i class="fas fa-pause"></i>';
+                        musicBtn.style.color = '#4CAF50';
+                        songTitle.style.color = '#4CAF50';
+                    });
+            }
+            
+            showNotification(`Now playing: ${songs[currentSongIndex].title}`, 'music');
+        }
+
+        // Previous Song
+        function previousSong() {
+            currentSongIndex = (currentSongIndex - 1 + songs.length) % songs.length;
+            bgMusic.src = songs[currentSongIndex].src;
+            songTitle.textContent = songs[currentSongIndex].title;
+            
+            if (!bgMusic.paused) {
+                bgMusic.play()
+                    .then(() => {
+                        musicBtn.innerHTML = '<i class="fas fa-pause"></i>';
+                        musicBtn.style.color = '#4CAF50';
+                        songTitle.style.color = '#4CAF50';
+                    });
+            }
+            
+            showNotification(`Now playing: ${songs[currentSongIndex].title}`, 'music');
+        }
 
         // Create Floating Hearts
         function createFloatingHearts() {
@@ -957,25 +1038,25 @@
         }
 
         // Show Notification
-  function showNotification(text, type = 'success') {
-    notification.innerHTML = `
-        <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'music' ? 'music' : 'exclamation-circle'}"></i> ${text}
-    `;
-    
-    if (type === 'success') {
-        notification.style.background = 'linear-gradient(45deg, #4CAF50, #45a049)';
-    } else if (type === 'music') {
-        notification.style.background = 'linear-gradient(45deg, #2196F3, #1976D2)';
-    } else {
-        notification.style.background = 'linear-gradient(45deg, #f44336, #d32f2f)';
-    }
-    
-    notification.classList.add('show');
-    
-    setTimeout(() => {
-        notification.classList.remove('show');
-    }, 3000);
-}
+        function showNotification(text, type = 'success') {
+            notification.innerHTML = `
+                <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'music' ? 'music' : 'exclamation-circle'}"></i> ${text}
+            `;
+            
+            if (type === 'success') {
+                notification.style.background = 'linear-gradient(45deg, #4CAF50, #45a049)';
+            } else if (type === 'music') {
+                notification.style.background = 'linear-gradient(45deg, #2196F3, #1976D2)';
+            } else {
+                notification.style.background = 'linear-gradient(45deg, #f44336, #d32f2f)';
+            }
+            
+            notification.classList.add('show');
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
 
         // Show Error Message
         function showError(text) {
@@ -1247,88 +1328,6 @@
             });
         }
 
-// Music Variables - Your 3 Local Songs
-const songs = [
-    { title: "Duniya ❤️", src: "music/duniya.mp3" },
-    { title: "Saiyara 💕", src: "music/saiyara.mp3" },
-    { title: "Jaan ✨", src: "music/jaan.mp3" }
-];
-
-let currentSongIndex = 0;
-const bgMusic = document.getElementById('bgMusic');
-const musicBtn = document.getElementById('musicBtn');
-const songTitle = document.getElementById('songTitle');
-
-// Initialize Music Player
-function initializeMusic() {
-    if (songs.length > 0) {
-        bgMusic.src = songs[currentSongIndex].src;
-        songTitle.textContent = songs[currentSongIndex].title;
-        
-        // Auto play when song ends
-        bgMusic.addEventListener('ended', function() {
-            nextSong();
-        });
-    }
-}
-
-// Toggle Music Play/Pause
-function toggleMusic() {
-    if (bgMusic.paused) {
-        bgMusic.play()
-            .then(() => {
-                musicBtn.innerHTML = '<i class="fas fa-pause"></i>';
-                musicBtn.style.color = '#4CAF50';
-                songTitle.style.color = '#4CAF50';
-            })
-            .catch(error => {
-                console.error('Error playing music:', error);
-                showNotification('Could not play music. Make sure music files are in "music" folder.', 'error');
-            });
-    } else {
-        bgMusic.pause();
-        musicBtn.innerHTML = '<i class="fas fa-play"></i>';
-        musicBtn.style.color = '#ff4081';
-        songTitle.style.color = '#666';
-    }
-}
-
-// Next Song
-function nextSong() {
-    currentSongIndex = (currentSongIndex + 1) % songs.length;
-    bgMusic.src = songs[currentSongIndex].src;
-    songTitle.textContent = songs[currentSongIndex].title;
-    
-    if (!bgMusic.paused) {
-        bgMusic.play()
-            .then(() => {
-                musicBtn.innerHTML = '<i class="fas fa-pause"></i>';
-                musicBtn.style.color = '#4CAF50';
-                songTitle.style.color = '#4CAF50';
-            });
-    }
-    
-    showNotification(`Now playing: ${songs[currentSongIndex].title}`, 'music');
-}
-
-// Previous Song
-function previousSong() {
-    currentSongIndex = (currentSongIndex - 1 + songs.length) % songs.length;
-    bgMusic.src = songs[currentSongIndex].src;
-    songTitle.textContent = songs[currentSongIndex].title;
-    
-    if (!bgMusic.paused) {
-        bgMusic.play()
-            .then(() => {
-                musicBtn.innerHTML = '<i class="fas fa-pause"></i>';
-                musicBtn.style.color = '#4CAF50';
-                songTitle.style.color = '#4CAF50';
-            });
-    }
-    
-    showNotification(`Now playing: ${songs[currentSongIndex].title}`, 'music');
-}
-
         // Add some interactive effects
         document.addEventListener('click', function(e) {
             // Create heart on click
@@ -1413,9 +1412,6 @@ function previousSong() {
                 }
             });
         }
-        
-        // Uncomment to debug
-        // setTimeout(debugDatabase, 2000);
     </script>
 </body>
 </html>
